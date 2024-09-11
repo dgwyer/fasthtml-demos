@@ -2,7 +2,7 @@
 
 This is (or will be) a collection of demo FastHTML apps I'm creating to help me learn HTMX, FastHTML, SQLite and other related technologies.
 
-Feel free to suggest and app! Just open a new issue.
+Feel free to suggest an app! Just open a new issue.
 
 # [Tailwind in FastHTML](/01-tailwind-basic/)
 
