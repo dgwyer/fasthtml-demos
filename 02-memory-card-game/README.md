@@ -1,3 +1,7 @@
+# !!! Work in Progress !!!
+
+This example isn't working yet, and is under active development.
+
 # FastHTML Memory Card Game
 
 This example app demonstrates a simple memory card game using TailwindCSS, AlpineJS inside a FastHTML app.
