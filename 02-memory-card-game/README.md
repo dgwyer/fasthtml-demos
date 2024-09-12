@@ -1,6 +1,6 @@
-# FastHTML Tailwind App
+# FastHTML Memory Card Game
 
-This example app demonstrates how to integrate the Tailwind CSS framework into a FastHTML app.
+This example app demonstrates a simple memory card game using TailwindCSS, AlpineJS inside a FastHTML app.
 
 <img src="../assets/01-tw-thumb.png" width="500" alt="TailwindCSS in a FastHTML app">
 
