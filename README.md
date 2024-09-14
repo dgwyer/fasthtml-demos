@@ -12,8 +12,8 @@ Basic example of integrating TailwindCSS in a FastHTML app.
 
 <img src="assets/01-tw-thumb.png" width="500" alt="TailwindCSS in a FastHTML app">
 
-# [2. Carc Matching Memory Game](/02-card-memory-game/)
+# [2. Card Matching Memory Game](/02-card-memory-game/)
 
 A fun card matching memory game built with HTMX, FastHTML, and AlpineJS.
 
-<img src="../assets/02-card-game.png" width="500" alt="Card matching game">
+<img src="assets/02-card-game.png" width="500" alt="Card matching game">
