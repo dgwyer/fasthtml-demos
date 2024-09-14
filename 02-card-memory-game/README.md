@@ -1,12 +1,6 @@
-# !!! Work in Progress !!!
-
-This example isn't working yet, and is under active development.
-
 # FastHTML Memory Card Game
 
 This example app demonstrates a simple memory card game using TailwindCSS, AlpineJS inside a FastHTML app.
-
-<img src="../assets/01-tw-thumb.png" width="500" alt="TailwindCSS in a FastHTML app">
 
 ## Running Locally
 
@@ -14,7 +8,7 @@ To run the app locally:
 
 1. Clone the repository
 2. Navigate to the project directory
-3. Install the standalone TailwindCSS CLI (see below).
+3. [optional] Install the standalone TailwindCSS CLI (see below).
 4. Create a new Python environment if you wish.
 5. Install the project dependencies: `pip install  -r requirements.txt`
 6. In one terminal start the Python server: `python main.py`
