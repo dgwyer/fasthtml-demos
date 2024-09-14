@@ -2,6 +2,8 @@
 
 This example app demonstrates a simple memory card game using TailwindCSS, AlpineJS inside a FastHTML app.
 
+<img src="../assets/02-card-game.png" width="500" alt="Card matching game">
+
 ## Running Locally
 
 To run the app locally:
