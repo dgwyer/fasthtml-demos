@@ -1,4 +1,13 @@
-# FastHTML Memory Card Game
+---
+title: FastHTML Card Memory Game
+colorFrom: green
+colorTo: green
+sdk: docker
+pinned: false
+license: apache-2.0
+---
+
+# FastHTML Card Matching Memory Game
 
 This example app demonstrates a simple memory card game using TailwindCSS, AlpineJS inside a FastHTML app.
 

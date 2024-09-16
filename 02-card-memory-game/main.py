@@ -1,6 +1,7 @@
 from fasthtml.common import *
 from fasthtml.svg import *
 from svgs import fasthtml_logo
+from fasthtml_hf import setup_hf_backup
 
 app,rt = fast_app(
 	live=True,
@@ -24,12 +25,14 @@ function game() {
     cds.sort((a, b) => 0.5 - Math.random());
     
     return {
+        card_clicks: 0,
         cheats: 3,
         cards: cds,
         get flippedCards() {
             return this.cards.filter(card => card.flipped);
         },
         flipCard(card) {
+            this.card_clicks += 1;
             if( card.cleared ) { return; }
             if( this.flippedCards.length <= 1 ) { card.flipped = ! card.flipped; }
              
@@ -60,7 +63,8 @@ function game() {
                 c.flipped = false;
                 c.cleared = false;
             });
-            this.cheats  = 3;
+            this.cheats = 3;
+            this.card_clicks = 0;
             setTimeout(() => {
                 this.cards.sort((a, b) => 0.5 - Math.random());   
             }, 500);
@@ -75,7 +79,7 @@ function game() {
                     this.cards.forEach(c => {
                         c.flipped = false;
                     });
-                }, 500);
+                }, 750);
             }
         },
     };
@@ -128,9 +132,14 @@ def get(): return Title('Card Memory Game in FastHTML'), Div(
                     cls='grid grid-cols-6 gap-4 w-[944px]'
                 ),
             ),
-            cls='flex items-center justify-center my-20'
+            cls='flex items-center justify-center mt-10'
         ),
         Div(
+            Div(
+                Div(),
+                cls='flex items-center justify-center my-5 font-bold',
+                **{"x-text": "'Card clicks: ' + card_clicks"},
+            ),
             Div(
                 A(
                     'Restart Game',
@@ -144,19 +153,25 @@ def get(): return Title('Card Memory Game in FastHTML'), Div(
                 ),
                 cls='flex items-center justify-center gap-4'
             ),
-            P(
-                'Cheat mode reveals all tiles! But you only have three per game so use wisely!',
+            Div(
+                'Reveal all the matching pairs of cards in the fewest clicks possible.',
                 cls='mt-6 flex items-center justify-center gap-4'
+            ),
+            Div(
+                'Click the \'Cheat Mode\' button to reveal all tiles, but you only have three per game so use wisely!',
+                cls='flex items-center justify-center gap-4'
             ),
         ),
         cls='mb-20',
         x_data='game()',
     ),
     Footer(
-        A('Made by David Gwyer - Follow me on X', href="https://x.com/dgwyer", _target="_blank", cls="drop-shadow-lg text-lg"),
+        A('Created by David Gwyer - Follow me on X', href="https://x.com/dgwyer", _target="_blank", cls="drop-shadow-lg text-lg"),
         cls='bg-gray-800 text-white text-center py-8'
     ),
     cls='bg-gray-100 text-gray-800'
 ), Script(js)
+
+setup_hf_backup(app)
 
 serve(reload_includes=["*.css"])
