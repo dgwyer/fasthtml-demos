@@ -1,0 +1,9 @@
+python-fasthtml
+uvicorn>=0.29
+python-multipart
+sqlite-utils
+huggingface-hub>=0.20.0
+fasthtml-hf
+jupyterlab
+sqlite-web
+graphviz

@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.test {
+    @apply bg-red-500;
+}
+
+.test1 {
+    color: hotpink;
+}
