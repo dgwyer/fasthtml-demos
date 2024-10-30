@@ -1,8 +1,10 @@
 from fasthtml.common import *
 from hmac import compare_digest
+from datetime import datetime
 from templates import _404, clr_details, header, footer
 from utils import login_redir, home_redir, Login
 from db import before, todos, users, Todo, User
+from pprint import pprint
 import subprocess
 
 bware = Beforeware(before, skip=[r'/favicon\.ico', r'/assets/.*', r'.*\.css', '/', '/login'])
@@ -23,7 +25,8 @@ def header_html(sess):
     # Get the authenticated user from the session
     auth = sess.get('auth')
     if auth:
-        user_info = H2(f"Welcome, {auth}!", cls="user-info")
+        user_name = sess.get('user_name')
+        user_info = H2(f"Welcome, {user_name}!", cls="user-info")
         links['Logout'] = '/logout'
         
     else:
@@ -41,7 +44,8 @@ def get(sess):
         Div(
             user_info,
             Div('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ut consequat neque, vel luctus elit. Nunc elementum sapien nunc, vel efficitur urna malesuada nec. Fusce vulputate ornare congue. Proin vulputate lacus lorem, vitae dignissim massa luctus eget. Nam ante libero, ornare eu enim eu, vulputate suscipit nulla. Donec consectetur, dui vel malesuada ullamcorper, metus sem dignissim nunc, et varius nisl est sit amet nisl. Quisque placerat feugiat sapien, id vulputate turpis dignissim id. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec mauris ante, viverra nec sem ac, interdum sollicitudin nisl.'),
-            cls="container-section"
+            Div('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut ut consequat neque, vel luctus elit. Nunc elementum sapien nunc, vel efficitur urna malesuada nec. Fusce vulputate ornare congue. Proin vulputate lacus lorem, vitae dignissim massa luctus eget. Nam ante libero, ornare eu enim eu, vulputate suscipit nulla. Donec consectetur, dui vel malesuada ullamcorper, metus sem dignissim nunc, et varius nisl est sit amet nisl. Quisque placerat feugiat sapien, id vulputate turpis dignissim id. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec mauris ante, viverra nec sem ac, interdum sollicitudin nisl.'),
+            cls="space-y-6 container-section"
         ),
         footer(links={'Follow me on Twitter': 'https://x.com/dgwyer'}),
     )
@@ -75,6 +79,10 @@ def get(sess):
 
 @rt("/login")
 def post(login:Login, sess):
+    pprint(f"users: {dir(users)}")
+    # print(f"login: {login.name}, {login.pwd}")
+    a = users(where=f"name = ?", values=[login.name])[0]
+    print(f"a: {a}")
     if not login.name or not login.pwd: return login_redir
     try: u = users[login.name]
     # If the primary key does not exist, the method raises a `NotFoundError`.
@@ -83,7 +91,8 @@ def post(login:Login, sess):
     if not compare_digest(u.pwd.encode("utf-8"), login.pwd.encode("utf-8")): return login_redir
     # Because the session is signed, we can securely add information to it. It's stored in the browser cookies.
     # If you don't pass a secret signing key to `FastHTML`, it will auto-generate one and store it in a file `./sesskey`.
-    sess['auth'] = u.name
+    sess['auth'] = u.id
+    sess['user_name'] = u.name
     intended_url = sess.pop('intended_url', '/')
     
     return RedirectResponse(intended_url, status_code=303)
@@ -93,6 +102,8 @@ def post(login:Login, sess):
 @rt("/logout")
 def get(sess):
     del sess['auth']
+    if 'user_name' in sess:
+        del sess['user_name'] 
     return home_redir
 
 ### Todo Routes ###
@@ -100,29 +111,26 @@ def get(sess):
 # By including the `auth` parameter, it gets passed the current username, for displaying in the title.
 @rt("/todos")
 def get(auth, sess):
-    title = f"{auth}'s Todo list"
-    top = Grid(H1(title), Div(A('logout', href='/logout'), style='text-align: right'))
-    # We don't normally need separate "screens" for adding or editing data. Here for instance,
-    # we're using an `hx-post` to add a new todo, which is added to the start of the list (using 'afterbegin').
+    user_name = sess.get('user_name', 'User')
     new_inp = Input(id="new-title", name="title", type="text", placeholder="New Todo")
     add = Form(Group(new_inp, Button("Add", cls='btn')),
-               hx_post="/todos", target_id='todo-list', hx_swap="afterbegin", cls="mb-12")
+               hx_post="/todos", target_id='todo-list', hx_swap="afterbegin", cls="mb-8")
     items = Tbody(*todos(order_by='priority'),
                id='todo-list', cls='sortable divide-y divide-gray-200')
-    # We create an empty 'current-todo' Div at the bottom of our page, as a target for the details and editing views.
-    card = Card(Ul(items), header=add, footer=Div(id='current-todo'))
     user_info, links = header_html(sess)
 
     return (
         header(links=links),
         Div(
             add,
+            H2(f"{user_name}'s Todo list", cls='mb-6'),
             Table(
                 Thead(
                     Tr(
                         Th('Title', scope='col', cls='min-w-[180px] pr-3 py-3.5 text-left text-sm font-semibold text-gray-900'),
                         Th('ToDo', scope='col', cls='min-w-[300px] max-w-[500px] pr-3 py-3.5 text-left text-sm font-semibold text-gray-900'),
                         Th('Done', scope='col', cls='min-w-[100px] pr-3 py-3.5 text-left text-sm font-semibold text-gray-900'),
+                        Th('Date Added', scope='col', cls='min-w-[100px] pr-3 py-3.5 text-left text-sm font-semibold text-gray-900'),
                         Th(
                             Span('Edit', cls='sr-only'),
                             scope='col',
@@ -147,37 +155,62 @@ def delete(id:int):
 
 @rt("/edit/{id}")
 def get(id:int):
-    res = Form(
-        Group(Input(id="title", type="text"),
-        Button("Save", cls='btn'),
-        Button("Cancel", hx_get="/todos/cancel", hx_target="#edit", cls='btn')),
-        Hidden(id="id"),
-        CheckboxX(id="done", label='Done'),
-        Textarea(id="details", name="details", rows=10),
-        Button('Delete', hx_delete=f'/todos/{id}', hx_target=f'#todo-{id}', hx_swap="outerHTML", cls='btn'),
-        hx_put="/todos", hx_swap="outerHTML", hx_target=f'#todo-{id}', id="edit")
+    res = Div(
+        H2('Edit Todo', cls='mb-2'),
+        Form(
+            Div(Input(id="title", type="text", cls='w-[250px]')),
+            Div(Textarea(id="details", name="details", cls='w-[250px] h-[100px]')),
+            Div(CheckboxX(id="done", label='Done')),
+            Div(
+                Div(
+                    Button("Save", cls='btn small'),
+                    Button("Cancel", hx_put="/todos/cancel", cls='btn small'),
+                    cls="flex justify-between gap-x-2"
+                ),
+                Button('Delete', hx_delete=f'/todos/{id}', hx_target=f'#todo-{id}', hx_swap="outerHTML", cls='text-red-700 hover:text-red-500 small'),
+                cls="flex justify-between space-x-4 w-[250px]"
+            ),
+            Hidden(id="id"),
+            hx_put="/todos",
+            hx_swap="outerHTML",
+            hx_target=f'#todo-{id}',
+            cls="space-y-3"
+        ),
+        id="edit",
+        cls="mt-9"
+    )
     # `fill_form` populates the form with existing todo data, and returns the result.
     # Indexing into a table (`todos`) queries by primary key, which is `id` here. It also includes
     # `xtra`, so this will only return the id if it belongs to the current user.
     return fill_form(res, todos[id])
 
-@app.get("/todos/cancel")
-def cancel():
+@rt("/todos/{id}")
+def get(id:int):
+    todo = todos[id]
+    return Div(
+        H2(todo.title),
+        Div(todo.details, cls="py-4"),
+        Button('Delete', hx_delete=f'/todos/{todo.id}', target_id=f'todo-{todo.id}', hx_swap="outerHTML", cls='btn'),
+        cls="mt-9"
+    )
+
+@rt("/todos/cancel")
+def put():
     return clr_details()
 
 @rt("/todos")
 def put(todo: Todo):
-    if todo.title == '' or todo.title is None:
-        return None
+    todo_title = todo.title.strip()
+    if todo_title == '' or todo_title is None:
+        return clr_details()
 
-    # `update` is part of the MiniDataAPI spec.
-    # Note that the updated todo is returned. By returning the updated todo, we can update the list directly.
-    # Because we return a tuple with `clr_details()`, the details view is also cleared.
     return todos.update(todo), clr_details()
 
 @rt("/todos")
-def post(todo:Todo):
-    if todo.title == '' or todo.title is None:
+def post(todo:Todo, auth, sess):
+    print(f"auth: {auth}, sess: {sess}")
+    todo_title = todo.title.strip()
+    if todo_title == '' or todo_title is None:
         return None
 
     # `hx_swap_oob='true'` tells HTMX to perform an out-of-band swap, updating this element wherever it appears.
@@ -185,15 +218,10 @@ def post(todo:Todo):
     new_inp =  Input(id="new-title", name="title", type="text", placeholder="New Todo", hx_swap_oob='true')
     # `insert` returns the inserted todo, which is appended to the start of the list, because we used
     # `hx_swap='afterbegin'` when creating the todo list form.
+    todo.date = str(int(datetime.now().timestamp()))
+    todo.user_id = auth
+    print(todo)
     return todos.insert(todo), new_inp
-
-@rt("/todos/{id}")
-def get(id:int):
-    todo = todos[id]
-    # `hx_swap` determines how the update should occur. We use "outerHTML" to replace the entire todo `Li` element.
-    btn = Button('Delete', hx_delete=f'/todos/{todo.id}',
-                 target_id=f'todo-{todo.id}', hx_swap="outerHTML", cls='btn')
-    return Div(H2(todo.title), Div(todo.details, cls="p-2"), btn)
 
 ### Process Static Files ###
 

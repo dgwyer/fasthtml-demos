@@ -7,7 +7,7 @@ def _404(req, exc): return Title('404 - Page not found!'), Main(
         H1('Page not found', cls='mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-5xl'),
         P('Sorry, we couldn’t find the page you’re looking for.', cls='mt-6 text-base leading-7 text-gray-600'),
         Div(
-            Button(home_svg(), A('Home', href='/'), cls='btn'),
+            Button(A(home_svg(), 'Home', href='/', cls='inline-flex items-center gap-x-2 px-3.5 py-2.5'), cls='btn p-0'),
             cls='mt-10 flex items-center justify-center gap-x-6'
         ),
         cls='text-center'
