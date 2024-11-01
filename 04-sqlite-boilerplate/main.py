@@ -3,7 +3,7 @@ from hmac import compare_digest
 from datetime import datetime
 from templates import _404, clr_details, header, footer
 from utils import login_redir, home_redir, Login
-from db import before, todos, users, Todo, User
+from db import before, todos, users, Todo, User, db
 from pprint import pprint
 import subprocess
 
@@ -57,13 +57,15 @@ def get(sess):
     user_info, links = header_html(sess)
 
     frm = Form(
-        Input(id='name', type="text", placeholder='Name'),
+        H2('Login', cls='mb-2'),
+        #Input(id='name', type="text", placeholder='Name'),
+        Input(id='email', type="email", placeholder='Email'),
         Input(id='pwd', type='password', placeholder='Password'),
         Button(
             'Login',
             cls='btn'
         ),
-        cls='mt-10 flex gap-x-2 items-center justify-center',
+        cls='mt-10 flex flex-col gap-x-2 items-center justify-center',
         action='/login',
         method='post'
     )
@@ -80,10 +82,23 @@ def get(sess):
 @rt("/login")
 def post(login:Login, sess):
     pprint(f"users: {dir(users)}")
-    # print(f"login: {login.name}, {login.pwd}")
-    a = users(where=f"name = ?", values=[login.name])[0]
-    print(f"a: {a}")
-    if not login.name or not login.pwd: return login_redir
+    print(f"login: {login.email}, {login.name}, {login.pwd}")
+
+    for row in db.q("select * from users"):
+        print(row)
+
+    # Todo
+    # - If email no found then show user not found error. What error does WP show? Replace line 99
+    # - Show signup link and need to add this route to signup a new user.
+    #   - This page should not allow signups if email already exists.
+    # - Make the login form stak as in WP.
+    # - Implement magic link login
+    # - Check if email is valid
+    # - Add some more colors via a CSS property and use this for button color too etc.
+    # - Add a Twitter logo in footer.
+    # - Start to use md5 hashing for passwords. And 2FA?
+
+    if not login.email or not login.pwd: return login_redir
     try: u = users[login.name]
     # If the primary key does not exist, the method raises a `NotFoundError`.
     # Here we use this to just generate a user -- in practice you'd probably to redirect to a signup page.

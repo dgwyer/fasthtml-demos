@@ -757,6 +757,10 @@ h2 {
   margin: 0px;
 }
 
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
 .mt-10 {
   margin-top: 2.5rem;
 }
@@ -767,10 +771,6 @@ h2 {
 
 .mb-6 {
   margin-bottom: 1.5rem;
-}
-
-.mb-2 {
-  margin-bottom: 0.5rem;
 }
 
 .mt-9 {
@@ -876,6 +876,10 @@ h2 {
 
 .flex-row {
   flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
 }
 
 .flex-wrap {

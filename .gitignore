@@ -1,3 +1,6 @@
 __pycache__
 .sesskey
 .env
+*.db
+*.db-shm
+*.db-wal
